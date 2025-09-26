@@ -113,29 +113,30 @@ FILA* exclui_ultimo(FILA *cache,int *tam) //exclui apenas o ultimo elemento
     free(aux);
     return cache;
 }
-void cache_LRU(DADO dados[],int tam_vetor_dados,int *hit,int *miss,int *tam)
+void cache_LRU(DADO dados[],int tam_vetor_dados,int *hit,int *miss)
 {
 
     int j=0,i=0;
     FILA *cache=NULL;
+    static int  tam_fila=0;
     while(i<tam_vetor_dados)
     {
         if(esta_cache(cache,dados[i]))//dado esta na cache entao tira o elemetno do lugar que esta e coloca no inicio
         {
             *hit+=1;
-            cache=exclui_elemento(cache,dados[i],tam);
-            cache=insereInicio(cache,dados[i],tam);
+            cache=exclui_elemento(cache,dados[i],&tam_fila);
+            cache=insereInicio(cache,dados[i],&tam_fila);
         }
         else
         {
             *miss+=1;
-            if(*tam >= TAM)//verifica o tamanho, se necessario exclui o ultimo elemento e adiciona no inicio
+            if(tam_fila >= TAM)//verifica o tamanho, se necessario exclui o ultimo elemento e adiciona no inicio
             {
-                cache=exclui_ultimo(cache,tam);
-                cache=insereInicio(cache,dados[i],tam);
+                cache=exclui_ultimo(cache,&tam_fila);
+                cache=insereInicio(cache,dados[i],&tam_fila);
             }
             else
-                cache=insereInicio(cache,dados[i],tam);
+                cache=insereInicio(cache,dados[i],&tam_fila);
         }
         i++;
     }
@@ -160,9 +161,15 @@ int main(void)
     DADO e = {5, 0};
     DADO f = {6,0};
     DADO dados[8]= {a,b,c,a,a,e,d,d};
-    int hit=0,mis=0,tam=0;
-    //cache_LFU(dados,7,&hit,&mis);
-    cache_LRU(dados,8,&hit,&mis,&tam);
-    printf("hit=%d\nmiss=%d",hit,mis);
+    int hit_LFU=0,miss_LFU=0;
+    int hit_LRU=0,miss_LRU=0;
+
+    printf("...Simulador Cache...\n");
+    cache_LFU(dados,8,&hit_LFU,&miss_LFU);
+    printf("-------LFU-------\n");
+    printf("Numero de Hits=%d\nNumero de Misses=%d\n",hit_LFU,miss_LFU);
+    cache_LRU(dados,8,&hit_LRU,&miss_LRU);
+    printf("-------LRU-------\n");
+    printf("Numero de Hits=%d\nNumero de Misses=%d\n",hit_LRU,miss_LRU);
 
 }
